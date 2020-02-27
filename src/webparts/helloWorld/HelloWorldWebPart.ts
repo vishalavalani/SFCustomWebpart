@@ -15,7 +15,10 @@ import {
 } from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 import { escape } from "@microsoft/sp-lodash-subset";
-
+import {
+  PropertyPaneContinentSelector,
+  IPropertyPaneContinentSelectorProps
+} from "../../controls/PropertyPaneContinentSelector";
 import styles from "./HelloWorldWebPart.module.scss";
 import * as strings from "HelloWorldWebPartStrings";
 import MockHttpClient from "./MockHttpClient";
@@ -206,6 +209,15 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
     return Version.parse("1.0");
   }
 
+  private onContinentSelectionChange(
+    propertyPath: string,
+    newValue: any
+  ): void {
+    const oldValue: any = this.properties[propertyPath];
+    this.properties[propertyPath] = newValue;
+    this.render();
+  }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
@@ -221,9 +233,17 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
                   label: "Description",
                   onGetErrorMessage: this.validateDescription.bind(this)
                 }),
-                PropertyPaneTextField("myContinent", {
-                  label: "My Continent",
-                  onGetErrorMessage: this.validateContinents.bind(this)
+                // PropertyPaneTextField("myContinent", {
+                //   label: "My Continent",
+                //   onGetErrorMessage: this.validateContinents.bind(this)
+                // }),
+                new PropertyPaneContinentSelector("myContinent", <
+                  IPropertyPaneContinentSelectorProps
+                >{
+                  label: "Continent where I currently reside",
+                  disabled: false,
+                  selectedKey: this.properties.myContinent,
+                  onPropertyChange: this.onContinentSelectionChange.bind(this)
                 }),
                 PropertyPaneSlider("numContinentsVisited", {
                   label: "Number of continents I've visited",
