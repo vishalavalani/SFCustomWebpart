@@ -10,7 +10,8 @@ import {
   PropertyPaneTextField,
   PropertyPaneCheckbox,
   PropertyPaneDropdown,
-  PropertyPaneToggle
+  PropertyPaneToggle,
+  PropertyPaneSlider
 } from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 import { escape } from "@microsoft/sp-lodash-subset";
@@ -26,6 +27,8 @@ export interface IHelloWorldWebPartProps {
   test1: boolean;
   test2: string;
   test3: boolean;
+  myContinent: string;
+  numContinentsVisited: number;
 }
 
 export interface ISPLists {
@@ -74,6 +77,14 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
         styles.subTitle
       }"><strong>Environment:</strong> ${environmentType}</p>
     <p class="${styles.description}">${escape(this.properties.description)}</p>
+
+    <p class="${styles.description}">Continent where I reside: ${escape(
+        this.properties.myContinent
+      )}</p>
+<p class="${styles.description}">Number of continents I've visited: ${
+        this.properties.numContinentsVisited
+      }</p>
+
     <p class="${styles.description}">${escape(this.properties.test)}</p>
     <p class="${styles.description}">Loading from ${escape(
         this.context.pageContext.web.title
@@ -98,7 +109,7 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
           event.preventDefault();
           alert("Welcome to the SharePoint Framework!");
         });
-    }, 5000);
+    }, 1000);
 
     Log.info("HelloWorld", "message", this.context.serviceScope);
     Log.warn("HelloWorld", "WARNING message", this.context.serviceScope);
@@ -174,6 +185,23 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
     return "";
   }
 
+  private validateContinents(textboxValue: string): string {
+    const validContinentOptions: string[] = [
+      "africa",
+      "antarctica",
+      "asia",
+      "australia",
+      "europe",
+      "north america",
+      "south america"
+    ];
+    const inputToValidate: string = textboxValue.toLowerCase();
+
+    return validContinentOptions.indexOf(inputToValidate) === -1
+      ? 'Invalid continent entry; valid options are "Africa", "Antarctica", "Asia", "Australia", "Europe", "North America", and "South America"'
+      : "";
+  }
+
   protected get dataVersion(): Version {
     return Version.parse("1.0");
   }
@@ -192,6 +220,16 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
                 PropertyPaneTextField("description", {
                   label: "Description",
                   onGetErrorMessage: this.validateDescription.bind(this)
+                }),
+                PropertyPaneTextField("myContinent", {
+                  label: "My Continent",
+                  onGetErrorMessage: this.validateContinents.bind(this)
+                }),
+                PropertyPaneSlider("numContinentsVisited", {
+                  label: "Number of continents I've visited",
+                  min: 1,
+                  max: 7,
+                  showValue: true
                 }),
                 PropertyPaneTextField("test", {
                   label: "Multi-line Text Field",

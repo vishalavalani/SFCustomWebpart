@@ -23,6 +23,8 @@
       "officeFabricIconFontName": "BirthdayCake",
       "properties": {
         "description": "HelloWorld",
+        "myContinent": "Asia",
+        "numContinentsVisited": 4,
         "test": "Multi-line text field",
         "test1": true,
         "test2": "2",
