@@ -23,6 +23,11 @@ import styles from "./HelloWorldWebPart.module.scss";
 import * as strings from "HelloWorldWebPartStrings";
 import MockHttpClient from "./MockHttpClient";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import {
+  IPropertyFieldGroupOrPerson,
+  PropertyFieldPeoplePicker,
+  PrincipalType
+} from "@pnp/spfx-property-controls/lib/PropertyFieldPeoplePicker";
 
 export interface IHelloWorldWebPartProps {
   description: string;
@@ -32,6 +37,7 @@ export interface IHelloWorldWebPartProps {
   test3: boolean;
   myContinent: string;
   numContinentsVisited: number;
+  people: IPropertyFieldGroupOrPerson[];
 }
 
 export interface ISPLists {
@@ -98,6 +104,7 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
       <a href="#" class="${styles.button}">
         <span class="${styles.label}">Learn more</span>
           </a>
+          <div class="selectedPeople"></div>
           </div>
           </div>
           <div id="spListContainer" />
@@ -112,6 +119,18 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
           event.preventDefault();
           alert("Welcome to the SharePoint Framework!");
         });
+
+      if (this.properties.people && this.properties.people.length > 0) {
+        let peopleList: string = "";
+        this.properties.people.forEach(person => {
+          peopleList =
+            peopleList + `<li>${person.fullName} (${person.email})</li>`;
+        });
+
+        this.domElement.getElementsByClassName(
+          "selectedPeople"
+        )[0].innerHTML = `<ul>${peopleList}</ul>`;
+      }
     }, 1000);
 
     Log.info("HelloWorld", "message", this.context.serviceScope);
@@ -250,6 +269,23 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
                   min: 1,
                   max: 7,
                   showValue: true
+                }),
+                PropertyFieldPeoplePicker("people", {
+                  label:
+                    "Property Pane Field People Picker PnP Reusable Control",
+                  initialData: this.properties.people,
+                  allowDuplicate: false,
+                  principalType: [
+                    PrincipalType.Users,
+                    PrincipalType.SharePoint,
+                    PrincipalType.Security
+                  ],
+                  onPropertyChange: this.onPropertyPaneFieldChanged,
+                  context: this.context,
+                  properties: this.properties,
+                  onGetErrorMessage: null,
+                  deferredValidationTime: 0,
+                  key: "peopleFieldId"
                 }),
                 PropertyPaneTextField("test", {
                   label: "Multi-line Text Field",
