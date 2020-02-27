@@ -2,7 +2,8 @@ import {
   Version,
   DisplayMode,
   Environment,
-  EnvironmentType
+  EnvironmentType,
+  Log
 } from "@microsoft/sp-core-library";
 import {
   IPropertyPaneConfiguration,
@@ -98,6 +99,15 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
           alert("Welcome to the SharePoint Framework!");
         });
     }, 5000);
+
+    Log.info("HelloWorld", "message", this.context.serviceScope);
+    Log.warn("HelloWorld", "WARNING message", this.context.serviceScope);
+    Log.error(
+      "HelloWorld",
+      new Error("Error message"),
+      this.context.serviceScope
+    );
+    Log.verbose("HelloWorld", "VERBOSE message", this.context.serviceScope);
   }
 
   private _getMockListData(): Promise<ISPLists> {
