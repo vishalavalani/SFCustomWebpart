@@ -28,6 +28,10 @@ import {
   PropertyFieldPeoplePicker,
   PrincipalType
 } from "@pnp/spfx-property-controls/lib/PropertyFieldPeoplePicker";
+import {
+  PropertyFieldCollectionData,
+  CustomCollectionFieldType
+} from "@pnp/spfx-property-controls/lib/PropertyFieldCollectionData";
 
 export interface IHelloWorldWebPartProps {
   description: string;
@@ -38,6 +42,7 @@ export interface IHelloWorldWebPartProps {
   myContinent: string;
   numContinentsVisited: number;
   people: IPropertyFieldGroupOrPerson[];
+  expansionOptions: any[];
 }
 
 export interface ISPLists {
@@ -105,6 +110,7 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
         <span class="${styles.label}">Learn more</span>
           </a>
           <div class="selectedPeople"></div>
+          <div class="expansionOptions"></div>
           </div>
           </div>
           <div id="spListContainer" />
@@ -130,6 +136,23 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
         this.domElement.getElementsByClassName(
           "selectedPeople"
         )[0].innerHTML = `<ul>${peopleList}</ul>`;
+      }
+
+      if (
+        this.properties.expansionOptions &&
+        this.properties.expansionOptions.length > 0
+      ) {
+        let expansionOptions: string = "";
+        this.properties.expansionOptions.forEach(option => {
+          expansionOptions =
+            expansionOptions +
+            `<li>${option["Region"]}: ${option["Comment"]} </li>`;
+        });
+        if (expansionOptions.length > 0) {
+          this.domElement.getElementsByClassName(
+            "expansionOptions"
+          )[0].innerHTML = `<ul>${expansionOptions}</ul>`;
+        }
       }
     }, 1000);
 
@@ -286,6 +309,34 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
                   onGetErrorMessage: null,
                   deferredValidationTime: 0,
                   key: "peopleFieldId"
+                }),
+                PropertyFieldCollectionData("expansionOptions", {
+                  key: "collectionData",
+                  label: "Possible expansion options",
+                  panelHeader: "Possible expansion options",
+                  manageBtnLabel: "Manage expansion options",
+                  value: this.properties.expansionOptions,
+                  fields: [
+                    {
+                      id: "Region",
+                      title: "Region",
+                      required: true,
+                      type: CustomCollectionFieldType.dropdown,
+                      options: [
+                        { key: "Northeast", text: "Northeast" },
+                        { key: "Northwest", text: "Northwest" },
+                        { key: "Southeast", text: "Southeast" },
+                        { key: "Southwest", text: "Southwest" },
+                        { key: "North", text: "North" },
+                        { key: "South", text: "South" }
+                      ]
+                    },
+                    {
+                      id: "Comment",
+                      title: "Comment",
+                      type: CustomCollectionFieldType.string
+                    }
+                  ]
                 }),
                 PropertyPaneTextField("test", {
                   label: "Multi-line Text Field",
