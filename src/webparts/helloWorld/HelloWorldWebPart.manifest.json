@@ -18,9 +18,9 @@
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
       "group": { "default": "Other" },
-      "title": { "default": "HelloWorld" },
-      "description": { "default": "HelloWorld description" },
-      "officeFabricIconFontName": "Page",
+      "title": { "default": "Hello SPFx" },
+      "description": { "default": "My First SPFx" },
+      "officeFabricIconFontName": "BirthdayCake",
       "properties": {
         "description": "HelloWorld",
         "test": "Multi-line text field",

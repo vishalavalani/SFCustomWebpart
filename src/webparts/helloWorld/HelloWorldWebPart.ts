@@ -1,4 +1,9 @@
-import { Version } from "@microsoft/sp-core-library";
+import {
+  Version,
+  DisplayMode,
+  Environment,
+  EnvironmentType
+} from "@microsoft/sp-core-library";
 import {
   IPropertyPaneConfiguration,
   PropertyPaneTextField,
@@ -13,7 +18,6 @@ import styles from "./HelloWorldWebPart.module.scss";
 import * as strings from "HelloWorldWebPartStrings";
 import MockHttpClient from "./MockHttpClient";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
-import { Environment, EnvironmentType } from "@microsoft/sp-core-library";
 
 export interface IHelloWorldWebPartProps {
   description: string;
@@ -36,10 +40,26 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
   IHelloWorldWebPartProps
 > {
   public render(): void {
-    this._getListData().then(d => {
-      console.log("lists", d);
-    });
-    this.domElement.innerHTML = `
+    const pageMode: string =
+      this.displayMode === DisplayMode.Edit
+        ? "You are in edit mode"
+        : "You are in read mode";
+    const environmentType: string =
+      Environment.type === EnvironmentType.Local
+        ? "You are in local environment"
+        : "You are in SharePoint environment";
+
+    this.context.statusRenderer.displayLoadingIndicator(
+      this.domElement,
+      "from server. Please wait!"
+    );
+    setTimeout(() => {
+      this.context.statusRenderer.clearLoadingIndicator(this.domElement);
+
+      this._getListData().then(d => {
+        console.log("lists", d);
+      });
+      this.domElement.innerHTML = `
       <div class="${styles.helloWorld}">
     <div class="${styles.container}">
       <div class="${styles.row}">
@@ -48,15 +68,19 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
   <p class="${
     styles.subTitle
   }">Customize SharePoint experiences using Web Parts.</p>
+  <p class="${styles.subTitle}"><strong>Page mode:</strong> ${pageMode}</p>
+<p class="${
+        styles.subTitle
+      }"><strong>Environment:</strong> ${environmentType}</p>
     <p class="${styles.description}">${escape(this.properties.description)}</p>
     <p class="${styles.description}">${escape(this.properties.test)}</p>
     <p class="${styles.description}">Loading from ${escape(
-      this.context.pageContext.web.title
-    )}</p>
+        this.context.pageContext.web.title
+      )}</p>
 
     
 
-      <a href="https://aka.ms/spfx" class="${styles.button}">
+      <a href="#" class="${styles.button}">
         <span class="${styles.label}">Learn more</span>
           </a>
           </div>
@@ -65,7 +89,15 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
           </div>
           </div>`;
 
-    this._renderListAsync();
+      this._renderListAsync();
+
+      this.domElement
+        .getElementsByClassName(`${styles.button}`)[0]
+        .addEventListener("click", (event: any) => {
+          event.preventDefault();
+          alert("Welcome to the SharePoint Framework!");
+        });
+    }, 5000);
   }
 
   private _getMockListData(): Promise<ISPLists> {
@@ -120,6 +152,18 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
     }
   }
 
+  private validateDescription(value: string): string {
+    if (value === null || value.trim().length === 0) {
+      return "Provide a description";
+    }
+
+    if (value.length > 40) {
+      return "Description should not be longer than 40 characters";
+    }
+
+    return "";
+  }
+
   protected get dataVersion(): Version {
     return Version.parse("1.0");
   }
@@ -136,7 +180,8 @@ export default class HelloWorldWebPart extends BaseClientSideWebPart<
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyPaneTextField("description", {
-                  label: "Description"
+                  label: "Description",
+                  onGetErrorMessage: this.validateDescription.bind(this)
                 }),
                 PropertyPaneTextField("test", {
                   label: "Multi-line Text Field",
